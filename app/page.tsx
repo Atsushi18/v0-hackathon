@@ -18,11 +18,6 @@ interface Message {
   isCode?: boolean
 }
 
-const API_CONFIG = {
-  apiKey: "YOUR_ACTUAL_API_KEY_HERE", // APIキーはバックエンドで使用するため、ここは参考用
-  model: "cotomi2-pro", // または "deepseek-r1-distill-qwen-14b-japanese", "llm-jp3-13b-instruct3"
-}
-
 export default function VibeCodingTool() {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -65,17 +60,6 @@ export default function VibeCodingTool() {
   const sendMessage = async () => {
     if (!input.trim()) return
 
-    if (!API_CONFIG.apiKey || API_CONFIG.apiKey === "" || API_CONFIG.apiKey === "YOUR_ACTUAL_API_KEY_HERE") {
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "⚠️ APIキーが設定されていません。\n\napp/api/chat/route.ts ファイルでAPIキーを設定してください。",
-        timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, errorMessage])
-      return
-    }
-
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
@@ -95,8 +79,7 @@ export default function VibeCodingTool() {
         },
         body: JSON.stringify({
           message: input,
-          apiKey: API_CONFIG.apiKey,
-          messages: messages.slice(-5), // 直近5件のメッセージを送信
+          messages: messages.slice(-5),
         }),
       })
 
@@ -121,7 +104,7 @@ export default function VibeCodingTool() {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: `❌ エラーが発生しました: ${error instanceof Error ? error.message : "不明なエラー"}\n\n• APIキーを確認してください\n• ネットワーク接続を確認してください`,
+        content: `❌ エラーが発生しました: ${error instanceof Error ? error.message : "不明なエラー"}\n\n• .env.localファイルにSAKURA_API_KEYが設定されているか確認してください\n• ネットワーク接続を確認してください`,
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, errorMessage])

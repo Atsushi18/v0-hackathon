@@ -4,10 +4,13 @@ export async function POST(request: NextRequest) {
   try {
     const { message, apiKey, messages } = await request.json()
 
-    const SAKURA_API_KEY = "YOUR_ACTUAL_API_KEY_HERE" // ここに実際のAPIキーを入力してください
+    const SAKURA_API_KEY = process.env.SAKURA_API_KEY
 
-    if (!SAKURA_API_KEY || SAKURA_API_KEY === "YOUR_ACTUAL_API_KEY_HERE") {
-      return NextResponse.json({ error: "サーバー側でAPIキーが設定されていません" }, { status: 500 })
+    if (!SAKURA_API_KEY) {
+      return NextResponse.json(
+        { error: "サーバー側でAPIキーが設定されていません。.env.localファイルにSAKURA_API_KEYを設定してください。" },
+        { status: 500 },
+      )
     }
 
     // システムプロンプトを設定（ハッカソン向けにカスタマイズ）
