@@ -60,9 +60,9 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("[v0] Request body:", JSON.stringify(requestBody, null, 2))
-    console.log("[v0] API URL:", "https://api.aipf.sakura.ad.jp/v1/chat/completions")
+    console.log("[v0] API URL:", "https://api.aipf.sakura.ad.jp/openai/v1/chat/completions")
 
-    const response = await fetch("https://api.aipf.sakura.ad.jp/v1/chat/completions", {
+    const response = await fetch("https://api.aipf.sakura.ad.jp/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${SAKURA_API_KEY}`,
