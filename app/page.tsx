@@ -72,23 +72,33 @@ export default function VibeCodingTool() {
     setIsLoading(true)
 
     try {
+      const requestData = {
+        message: input,
+        messages: messages.slice(-5),
+      }
+
+      console.log("[v0] Frontend: Sending POST request to /api/chat")
+      console.log("[v0] Frontend: Request data:", requestData)
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          message: input,
-          messages: messages.slice(-5),
-        }),
+        body: JSON.stringify(requestData),
       })
+
+      console.log("[v0] Frontend: Response status:", response.status)
+      console.log("[v0] Frontend: Response headers:", Object.fromEntries(response.headers.entries()))
 
       if (!response.ok) {
         const errorData = await response.json()
+        console.error("[v0] Frontend: Error response:", errorData)
         throw new Error(errorData.error || `HTTP Error: ${response.status}`)
       }
 
       const data = await response.json()
+      console.log("[v0] Frontend: Success response:", data)
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
