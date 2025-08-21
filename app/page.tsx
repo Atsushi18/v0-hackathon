@@ -19,9 +19,8 @@ interface Message {
 }
 
 const API_CONFIG = {
-  apiKey: "YOUR_API_KEY_HERE", // ここに実際のAPIキーを入力してください
+  apiKey: "YOUR_ACTUAL_API_KEY_HERE", // APIキーはバックエンドで使用するため、ここは参考用
   model: "cotomi2-pro", // または "deepseek-r1-distill-qwen-14b-japanese", "llm-jp3-13b-instruct3"
-  baseUrl: "https://api.aipf.sakura.ad.jp/v1/chat/completions",
 }
 
 export default function VibeCodingTool() {
@@ -66,6 +65,17 @@ export default function VibeCodingTool() {
   const sendMessage = async () => {
     if (!input.trim()) return
 
+    if (!API_CONFIG.apiKey || API_CONFIG.apiKey === "" || API_CONFIG.apiKey === "YOUR_ACTUAL_API_KEY_HERE") {
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "⚠️ APIキーが設定されていません。\n\napp/api/chat/route.ts ファイルでAPIキーを設定してください。",
+        timestamp: new Date(),
+      }
+      setMessages((prev) => [...prev, errorMessage])
+      return
+    }
+
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
@@ -78,52 +88,40 @@ export default function VibeCodingTool() {
     setIsLoading(true)
 
     try {
-      const response = await fetch(API_CONFIG.baseUrl, {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${API_CONFIG.apiKey}`,
         },
         body: JSON.stringify({
-          model: API_CONFIG.model,
-          messages: [
-            {
-              role: "system",
-              content:
-                "あなたはハッカソン参加者をサポートするAIアシスタントです。アイデア出し、技術選択、コード生成など、プロダクト開発を全面的にサポートしてください。日本語で親しみやすく回答してください。",
-            },
-            {
-              role: "user",
-              content: input,
-            },
-          ],
-          max_tokens: 1000,
-          temperature: 0.7,
+          message: input,
+          apiKey: API_CONFIG.apiKey,
+          messages: messages.slice(-5), // 直近5件のメッセージを送信
         }),
       })
 
       if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`)
+        const errorData = await response.json()
+        throw new Error(errorData.error || `HTTP Error: ${response.status}`)
       }
 
       const data = await response.json()
-      const aiResponse = data.choices?.[0]?.message?.content || "申し訳ありません。回答を生成できませんでした。"
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: aiResponse,
+        content: data.content,
         timestamp: new Date(),
-        isCode: aiResponse.includes("```") || aiResponse.includes("コード"),
+        isCode: data.content.includes("```") || data.content.includes("コード"),
       }
 
       setMessages((prev) => [...prev, assistantMessage])
     } catch (error) {
-      console.error("API Error:", error)
+      console.error("[v0] Error:", error)
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: `エラーが発生しました: ${error instanceof Error ? error.message : "不明なエラー"}\n\nAPIキーが正しく設定されているか確認してください。`,
+        content: `❌ エラーが発生しました: ${error instanceof Error ? error.message : "不明なエラー"}\n\n• APIキーを確認してください\n• ネットワーク接続を確認してください`,
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, errorMessage])

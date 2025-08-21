@@ -4,8 +4,10 @@ export async function POST(request: NextRequest) {
   try {
     const { message, apiKey, messages } = await request.json()
 
-    if (!apiKey) {
-      return NextResponse.json({ error: "APIキーが必要です" }, { status: 400 })
+    const SAKURA_API_KEY = "YOUR_ACTUAL_API_KEY_HERE" // ここに実際のAPIキーを入力してください
+
+    if (!SAKURA_API_KEY || SAKURA_API_KEY === "YOUR_ACTUAL_API_KEY_HERE") {
+      return NextResponse.json({ error: "サーバー側でAPIキーが設定されていません" }, { status: 500 })
     }
 
     // システムプロンプトを設定（ハッカソン向けにカスタマイズ）
@@ -54,10 +56,10 @@ export async function POST(request: NextRequest) {
     }
 
     // さくらインターネットのAI Platform APIを呼び出し
-    const response = await fetch("https://api.aipf.sakura.ad.jp/openai/v1/chat/completions", {
+    const response = await fetch("https://api.aipf.sakura.ad.jp/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${SAKURA_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(requestBody),
