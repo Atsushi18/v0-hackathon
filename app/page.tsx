@@ -100,11 +100,11 @@ export default function VibeCodingTool() {
 
       setMessages((prev) => [...prev, assistantMessage])
     } catch (error) {
-      console.error("[v0] Error:", error)
+      console.error("[v0] Frontend Error:", error)
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: `❌ エラーが発生しました: ${error instanceof Error ? error.message : "不明なエラー"}\n\n• .env.localファイルにSAKURA_API_KEYが設定されているか確認してください\n• ネットワーク接続を確認してください`,
+        content: `❌ エラーが発生しました: ${error instanceof Error ? error.message : "不明なエラー"}\n\n• サーバーログを確認してください（VS Codeのターミナル）\n• .env.localファイルにSAKURA_API_KEYが設定されているか確認してください`,
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, errorMessage])
