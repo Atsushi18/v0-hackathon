@@ -10,6 +10,12 @@ import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Moon, Sun, Send, Copy, Play, Sparkles } from "lucide-react"
 
+const API_CONFIG = {
+  apiKey: "YOUR_API_KEY_HERE", // ここにAPIキーを入れてください
+  model: "cotomi2-pro", // または "deepseek-r1-distill-qwen-14b-japanese", "llm-jp3-13b-instruct3"
+  baseUrl: "https://api.aipf.sakura.ad.jp/v1/chat/completions",
+}
+
 interface Message {
   id: string
   role: "user" | "assistant"
@@ -72,14 +78,46 @@ export default function VibeCodingTool() {
     setIsLoading(true)
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      const response = await fetch(API_CONFIG.baseUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${API_CONFIG.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: API_CONFIG.model,
+          messages: [
+            {
+              role: "system",
+              content:
+                "あなたはハッカソン向けのAIコーディングアシスタントです。初心者にも分かりやすく、実用的なアドバイスとコードを提供してください。",
+            },
+            {
+              role: "user",
+              content: input,
+            },
+          ],
+          max_tokens: 1000,
+          temperature: 0.7,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status}`)
+      }
+
+      const data = await response.json()
+      const assistantContent = data.choices?.[0]?.message?.content || "回答を取得できませんでした。"
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: `素晴らしい質問ですね！「${input}」について説明します。\n\n実際のAPIが統合されると、ここにリアルタイムでAIからの回答が表示されます。\n\nハッカソンでは以下のポイントが重要です：\n• ユーザーのニーズを明確にする\n• シンプルなMVPから始める\n• 技術選択は慎重に\n• デモを意識した開発\n\nコードが必要でしたら、具体的にお聞かせください！`,
+        content: assistantContent,
         timestamp: new Date(),
-        isCode: input.includes("コード") || input.includes("作って") || input.includes("生成"),
+        isCode:
+          assistantContent.includes("```") ||
+          assistantContent.includes("function") ||
+          assistantContent.includes("const "),
       }
 
       setMessages((prev) => [...prev, assistantMessage])
@@ -88,7 +126,7 @@ export default function VibeCodingTool() {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "エラーが発生しました。もう一度お試しください。",
+        content: "エラーが発生しました。APIキーやネットワーク接続を確認してください。",
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, errorMessage])
