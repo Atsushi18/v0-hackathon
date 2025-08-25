@@ -37,24 +37,14 @@ export async function POST(request: NextRequest) {
 
 日本語で親しみやすく回答してください。`
 
-    const apiMessages = [
-      {
-        role: "system",
-        content: systemPrompt,
-      },
-      ...messages.slice(-10).map((msg: any) => ({
-        role: msg.role,
-        content: msg.content,
-      })),
-      {
-        role: "user",
-        content: message,
-      },
-    ]
-
     const requestBody = {
-      model: "cotomi2-pro", // デフォルトモデル
-      messages: apiMessages,
+      model: "cotomi2-pro",
+      messages: [
+        {
+          role: "user",
+          content: message,
+        },
+      ],
       max_tokens: 1000,
       temperature: 0.7,
     }

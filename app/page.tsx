@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Moon, Sun, Send, Copy, Play, Sparkles } from "lucide-react"
+import { Moon, Sun, Send, Copy, Play, Sparkles, Lock } from "lucide-react"
+import { Input } from "@/components/ui/input"
 
 interface Message {
   id: string
@@ -18,7 +19,13 @@ interface Message {
   isCode?: boolean
 }
 
+const PASSPHRASE = "hackathon2025"
+
 export default function VibeCodingTool() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [passphraseInput, setPassphraseInput] = useState("")
+  const [authError, setAuthError] = useState("")
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -33,7 +40,16 @@ export default function VibeCodingTool() {
   const [isDark, setIsDark] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
   useEffect(() => {
+    const savedAuth = localStorage.getItem("vibe-coding-auth")
+    if (savedAuth === "authenticated") {
+      setIsAuthenticated(true)
+    }
+
     const savedTheme = localStorage.getItem("theme")
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
     const shouldBeDark = savedTheme === "dark" || (!savedTheme && prefersDark)
@@ -42,20 +58,34 @@ export default function VibeCodingTool() {
     document.documentElement.classList.toggle("dark", shouldBeDark)
   }, [])
 
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
+  const handleAuthentication = () => {
+    if (passphraseInput === PASSPHRASE) {
+      setIsAuthenticated(true)
+      localStorage.setItem("vibe-coding-auth", "authenticated")
+      setAuthError("")
+    } else {
+      setAuthError("合言葉が間違っています")
+      setPassphraseInput("")
+    }
+  }
+
+  const handlePassphraseKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      handleAuthentication()
+    }
+  }
+
   const toggleTheme = () => {
     const newTheme = !isDark
     setIsDark(newTheme)
     document.documentElement.classList.toggle("dark", newTheme)
     localStorage.setItem("theme", newTheme ? "dark" : "light")
   }
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
 
   const sendMessage = async () => {
     if (!input.trim()) return
@@ -132,6 +162,46 @@ export default function VibeCodingTool() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background font-sans flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+                <Lock className="w-8 h-8 text-white" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl font-geist">バイブコーディング</CardTitle>
+            <p className="text-muted-foreground">合言葉を入力してください</p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Input
+                type="password"
+                placeholder="合言葉を入力..."
+                value={passphraseInput}
+                onChange={(e) => setPassphraseInput(e.target.value)}
+                onKeyPress={handlePassphraseKeyPress}
+                className="text-center"
+              />
+              {authError && <p className="text-sm text-destructive text-center">{authError}</p>}
+            </div>
+            <Button onClick={handleAuthentication} className="w-full" disabled={!passphraseInput.trim()}>
+              入室する
+            </Button>
+            <div className="flex justify-center">
+              <Button variant="ghost" size="icon" onClick={toggleTheme}>
+                <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
