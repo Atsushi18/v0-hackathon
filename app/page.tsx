@@ -45,7 +45,7 @@ export default function VibeCodingTool() {
   }
 
   useEffect(() => {
-    const savedAuth = localStorage.getItem("vibe-coding-auth")
+    const savedAuth = sessionStorage.getItem("vibe-coding-auth")
     if (savedAuth === "authenticated") {
       setIsAuthenticated(true)
     }
@@ -65,7 +65,7 @@ export default function VibeCodingTool() {
   const handleAuthentication = () => {
     if (passphraseInput === PASSPHRASE) {
       setIsAuthenticated(true)
-      localStorage.setItem("vibe-coding-auth", "authenticated")
+      sessionStorage.setItem("vibe-coding-auth", "authenticated")
       setAuthError("")
     } else {
       setAuthError("合言葉が間違っています")
