@@ -44,15 +44,15 @@ export default function VibeCodingTool() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
-  // useEffect(() => {
-  //   const savedAuth = sessionStorage.getItem("vibe-coding-auth")
-  //   if (savedAuth === "authenticated") {
-  //     setIsAuthenticated(true)
-  //   }
   useEffect(() => {
-  // ローカルストレージに認証状態が保存されていれば反映
-  const savedAuth = sessionStorage.getItem("vibe-coding-auth")
-  setIsAuthenticated(savedAuth === "authenticated") // 初期値 false から更新
+    const savedAuth = sessionStorage.getItem("vibe-coding-auth")
+    if (savedAuth === "authenticated") {
+      setIsAuthenticated(true)
+    }
+  // useEffect(() => {
+  // // ローカルストレージに認証状態が保存されていれば反映
+  // const savedAuth = sessionStorage.getItem("vibe-coding-auth")
+  // setIsAuthenticated(savedAuth === "authenticated") // 初期値 false から更新
 
 
 
