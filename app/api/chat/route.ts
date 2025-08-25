@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
       max_tokens: 1000,
       temperature: 0.7,
     }
+    //atsshi
 
     console.log("[v0] Request body:", JSON.stringify(requestBody, null, 2))
     console.log("[v0] API URL:", "https://api.aipf.sakura.ad.jp/openai/v1/chat/completions")

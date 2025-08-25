@@ -19,7 +19,7 @@ interface Message {
   isCode?: boolean
 }
 
-const PASSPHRASE = "hackathon2025"
+const PASSPHRASE = process.env.NEXT_PUBLIC_PASSPHRASE
 
 export default function VibeCodingTool() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -49,6 +49,12 @@ export default function VibeCodingTool() {
     if (savedAuth === "authenticated") {
       setIsAuthenticated(true)
     }
+  // useEffect(() => {
+  // // ローカルストレージに認証状態が保存されていれば反映
+  // const savedAuth = sessionStorage.getItem("vibe-coding-auth")
+  // setIsAuthenticated(savedAuth === "authenticated") // 初期値 false から更新
+
+
 
     const savedTheme = localStorage.getItem("theme")
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
